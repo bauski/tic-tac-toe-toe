@@ -36,12 +36,10 @@
 			] ;
 			
 			var turn = 1 ;
-			var player1 = 0 ;
-			var player2 = 1 ;
 			var computer = true ;
 			function init() {
 				//set space array x,y
-				for(var x = 0; x < elems.length ; x++)
+				for(var x = 0 ; x < elems.length ; x++)
 				{
 					for(var y = 0; y < elems.length ; y++)
 					{	
@@ -59,16 +57,11 @@
 				{
 					setSpace(elem,turn) ;
 					setPoints(elem,turn) ;
-					
-					console.log(points) ;
-					
 					setHTML(elem) ;
 					//checkWin(elem) ;
 					switchTurn() ;
-					//if(computer)
-					//	computerMove() ;
-					
-					
+					if(computer)
+						computerMove() ;
 				}
 			}
 			
@@ -97,7 +90,7 @@
 				var y = coor[0] * 1 ;
 				var x = coor[1] * 1 ;
 				
-				//we'll do 2 separate player cases for now and then combine later
+				//set point arrays by turn
 				if(turn == 1)
 				{
 					var at = 0 ;
@@ -151,7 +144,6 @@
 						points[at][y-1][x] -= 1 ;
 					}
 				}
-				
 				//if middle of col
 				if(typeof space[y-1] !== 'undefined' && typeof space[y+1] !== 'undefined')
 				{
@@ -191,7 +183,6 @@
 						points[at][y-1][x] -= 1 ;
 					}
 				}
-				
 				//if top of col
 				if(typeof space[y+1] !== 'undefined' && typeof space[y+2] !== 'undefined')
 				{
@@ -202,13 +193,13 @@
 						points[bt][y+2][x] -= 1 ;
 					}
 					//1st tile is player's
-					else if(space[y+2][x] == turn && space[y-2][x] == 0)
+					else if(space[y+2][x] == turn && space[y+1][x] == 0)
 					{
 						points[at][y+1][x] += 1 ;
 						points[bt][y+1][x] += 4 ;
 					}
 					//1st tile is opponents
-					else if(space[y+2][x] != turn && space[y-2][x] == 0)
+					else if(space[y+2][x] != turn && space[y+1][x] == 0)
 					{
 						points[at][y+1][x] -= 1 ;
 					}
@@ -231,7 +222,6 @@
 						points[at][y+2][x] -= 1 ;
 					}
 				}
-				
 				//if left of row
 				if(typeof space[y][x+1] != 'undefined' && typeof space[y][x+2] != 'undefined')
 				{
@@ -338,18 +328,17 @@
 						points[bt][y][x-1] -= 1 ;
 					}
 					//2nd tile is player's
-					else if(space[y][x-1] == turn && space[y][x-1] == 0)
+					else if(space[y][x-1] == turn && space[y][x-2] == 0)
 					{
 						points[at][y][x-2] += 1 ;
 						points[bt][y][x-2] += 4 ;
 					}
 					//2nd tile is opponents
-					else if(space[y][x-1] != turn && space[y][x-1] == 0)
+					else if(space[y][x-1] != turn && space[y][x-2] == 0)
 					{
 						points[at][y][x-2] -= 1 ;
 					}	
 				}
-				
 				//if top right of up-right diag
 				if(typeof space[y+1] != 'undefined' && typeof space[y+2] != 'undefined')
 				{
@@ -476,7 +465,6 @@
 						}
 					}
 				}
-				
 				//if top left of up-left diag
 				if(typeof space[y+1] != 'undefined' && typeof space[y+2] != 'undefined')
 				{
@@ -519,7 +507,6 @@
 						}
 					}
 				}
-				
 				//if middle of up-left diag
 				if(typeof space[y-1] != 'undefined' && typeof space[y+1] != 'undefined')
 				{
@@ -604,6 +591,8 @@
 						}
 					}
 				}
+				
+				console.log(points) ;
 			}
 			
 			function setHTML(elem) {
@@ -619,6 +608,49 @@
 					turn = 2 ;
 				else
 					turn = 1 ;
+			}
+			
+			function computerMove() {
+				//set up temp object for highest point places
+				var temp = new function() {
+					this.y = 0 ;
+					this.x = 0 ;
+					this.point = 0 ;
+				} ;
+			
+				//go through the point array for this turn
+				for(var y = 0 ; y < points[turn-1].length ; y++)
+				{
+					for(var x = 0 ; x < points[turn-1][y].length ; x++)
+					{
+						//if this point is higher than make it the place holder
+						if(temp.point < points[turn-1][y][x])
+						{
+							temp.point = points[turn-1][y][x] ;
+							temp.y = y ;
+							temp.x = x ;
+						}
+						//else if equal just randomly choose one
+						else if(temp.point == points[turn-1][y][x])
+						{
+							if(Math.floor((Math.random() * 2)) > 0)
+							{
+								temp.point = points[turn-1][y][x] ;
+								temp.y = y ;
+								temp.x = x ;
+							}
+						}
+					}
+				}
+				console.log("AI suggestion y: " + temp.y + " x: " + temp.x + " point: " + temp.point) ;
+				
+				var elem = elems[temp.y][temp.x] ;
+				
+				setSpace(elem,turn) ;
+				setPoints(elem,turn) ;
+				setHTML(elem) ;
+				//checkWin(elem) ;
+				switchTurn() ;
 			}
 			
 			window.onload = init ;
